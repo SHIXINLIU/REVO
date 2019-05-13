@@ -24,6 +24,7 @@
 #include <numeric>
 #include <sophus/se3.hpp>
 REVO::REVO(const std::string& settingsFile, const std::string& dataSettings,int nRuns = 0):
+
     mSettings(settingsFile,dataSettings,nRuns), camPyr(new CameraPyr(mSettings.settingsPyr))//,windowedOptimization(mSettings.settingsWO)
 {
     I3D_LOG(i3d::debug) << "SystemRGBD constructor";
@@ -39,8 +40,9 @@ REVO::REVO(const std::string& settingsFile, const std::string& dataSettings,int 
         mThViewer = std::unique_ptr<std::thread>(new std::thread(&REVOGui::Viewer::Run, mpViewer));
     }
 #endif
-    if (!camPyr) {I3D_LOG(i3d::error) << "camPyr failed!";}
-    I3D_LOG(i3d::detail) << " camPyr.size():" << camPyr->size() << " camPyr.area(0):" << camPyr->at(0).area;
+    if (!camPyr) 
+	{I3D_LOG(i3d::error) << "camPyr failed!";}
+    I3D_LOG(i3d::detail) << "camPyr.size(): " << camPyr->size() << "; camPyr.area(0): " << camPyr->at(0).area;
     mIOWrapper = std::shared_ptr<IOWrapperRGBD>(new IOWrapperRGBD(mSettings.settingsIO,mSettings.settingsPyr,camPyr));
     I3D_LOG(i3d::detail) << "after wrapper thread!";
     if (mSettings.DO_OUTPUT_POSES && !mSettings.settingsIO.isFinished)
@@ -77,17 +79,18 @@ REVO::~REVO()
 void REVO::writePose(const Eigen::Matrix3f &R, const Eigen::Vector3f &T, const double timeStamp)
 {
     const Eigen::Quaternionf Qf(R);
-    mPoseFile << std::fixed << timeStamp << " " << std::setprecision(9) << T[0] << " " << T[1] << " " << T[2] << " " <<  Qf.x() << " " << Qf.y() << " " << Qf.z() << " " << Qf.w() << std::endl;
+    mPoseFile << std::fixed << "timeStamp= " << timeStamp << "; " << std::setprecision(9) << "T[0]= " << T[0] << "; T[1]= " << T[1] << "; T[2]= " << T[2] << "; x= " <<  Qf.x() << "; y=  " << Qf.y() << "; z=  " << Qf.z() << "; w= " << Qf.w() << std::endl;
 }
 
 
 //The system and the pose graph
 bool REVO::start()
 {
-    if (isFinished) return false;
+    if (isFinished) 
+	return false;
     if (!mIOWrapper->isInitSuccess())
     {
-        I3D_LOG(i3d::error) << "IO not initialized properly or all datasets computed";
+        I3D_LOG(i3d::error) << "IO not initialized properly or all datasets computed!";
         return false;
     }
     //set nRuns to choose dataset!
@@ -102,7 +105,7 @@ bool REVO::start()
     //reference/key frame
     std::shared_ptr<ImgPyramidRGBD> kfPyr, prevPyr, currPyr;
 
-
+    // T_NM1_N: transformation from frame N to frame N-1
     Eigen::Matrix4f T_NM1_N = Eigen::Matrix4f::Identity();
     //ImgPyramidRGBD prevPyr(mConfig.pyrConfig,mCamPyr);
     mTracker = std::unique_ptr<TrackerNew>(new TrackerNew(mSettings.settingsTracker,mSettings.settingsPyr));//,camPyr));
@@ -138,17 +141,20 @@ bool REVO::start()
         }
 
         //Requesting image pyramid
-        I3D_LOG(i3d::error) << "Requesting img pyramid";
+        I3D_LOG(i3d::error) << "Requesting img pyramid~~~";
         if (!mIOWrapper->getOldestPyramid(currPyr))
         {
-            I3D_LOG(i3d::error) << "Error getting img pyramid";
+            I3D_LOG(i3d::error) << "Error getting img pyramid!";
             continue;
         }
-        I3D_LOG(i3d::error) << "Got img pyramid";
-        //Got image pyramid
+
+	//Got image pyramid
+        I3D_LOG(i3d::info) << "Got img pyramid";
+        
         currPyr->frameId = noFrames;
         const double tumRefTimestamp = currPyr->returnTimestamp();
         I3D_LOG(i3d::info) << std::fixed << "tumRefTimestamp: " << tumRefTimestamp;
+
         if (noFrames == 0) //first frame -> keyframe
         {
             kfPyr = currPyr;
@@ -158,7 +164,8 @@ bool REVO::start()
             kfPyr->prepareKfForStorage();
             mPoseGraph.push_back(Pose(Eigen::Matrix4f::Identity(),tumRefTimestamp,kfPyr));
             ++nKeyFrames;
-            if (mSettings.DO_OUTPUT_POSES) writePose(startPose.block<3,3>(0,0),startPose.block<3,1>(0,3),tumRefTimestamp);
+            if (mSettings.DO_OUTPUT_POSES) 
+		writePose(startPose.block<3,3>(0,0),startPose.block<3,1>(0,3),tumRefTimestamp);
 #ifdef WITH_PANGOLIN_VIEWER
             if (mSettings.DO_USE_PANGOLIN_VIEWER)
             {
@@ -169,12 +176,13 @@ bool REVO::start()
             }
 #endif
             ++noFrames;
-            //justAddedNewKeyframe = true;
+            
             justAddedNewKeyframe = true;
             mTracker->addOldPclAndPose(kfPyr->return3DEdges(mTracker->histogramLevel),Eigen::Matrix4f::Identity(),kfPyr->returnTimestamp());
             continue;
         }
-        I3D_LOG(i3d::info) << std::fixed << "prevTime: " << prevPyr->returnTimestamp() << " currTime: " << currPyr->returnTimestamp();
+	
+        I3D_LOG(i3d::info) << std::fixed << "prevTime: " << prevPyr->returnTimestamp() << ";  currTime: " << currPyr->returnTimestamp();
         ++noFrames;
         if (mSettings.DO_SHOW_DEBUG_IMAGE)
         {
@@ -188,6 +196,7 @@ bool REVO::start()
         auto beginTracking = Timer::getTime();
         trackerStatus = mTracker->trackFrames(R,T,error,kfPyr,currPyr);
         clock_t end = clock();
+	
         //positive cases
         Eigen::Matrix4f T_KF_N = transformFromRT(R,T);
         Eigen::Matrix4f currPoseInWorld = kfPyr->getTransKFtoWorld()*T_KF_N;

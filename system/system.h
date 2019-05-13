@@ -29,6 +29,7 @@
 #include "../io/iowrapperRGBD.h"
 #include <memory.h>
 #include "../utils/timer.h"
+
 class REVOConfig
 {
 public:
@@ -38,8 +39,9 @@ public:
         //Handle output through IOWrapper
         //Initialize the thing using OpenCV
 
-        I3D_LOG(i3d::info) << "MainFolder: " <<settingsIO.MainFolder+settingsIO.subDataset+"/" << nRuns;
-
+        I3D_LOG(i3d::info) << "MainFolder: " <<settingsIO.MainFolder+"/"+settingsIO.subDataset+"/" << nRuns;
+	
+	// store settingsfile in dataF
         cv::FileStorage dataF(settingsFile,cv::FileStorage::READ);
         if (!dataF.isOpened())
         {
@@ -90,12 +92,15 @@ public:
     {
     public:
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-        //
+        
         Pose(const Eigen::Matrix4f& T_kf_curr, double timestamp, const std::shared_ptr<ImgPyramidRGBD>& _kfFrame):
             T_kf_curr(T_kf_curr),isKeyFrame(false),timestamp(timestamp), kfFrame(_kfFrame)
         {
 
         }
+	// new frame = current frame
+	// T_W_N = T_W_F*T_kf_curr : transformation from new frame to world
+	// T_N_W = T_W_N.inv
         inline const Eigen::Matrix4f T_N_W() const
         {
             return (kfFrame->getTransKFtoWorld()*T_kf_curr).inverse();
@@ -104,7 +109,7 @@ public:
         {
             return getCurrToWorld();
         }
-
+	// T_N_kf: key frame to new frame(current frame)
         inline const Eigen::Matrix4f T_N_kf() const
         {
             return this->T_kf_curr.inverse();
@@ -113,6 +118,7 @@ public:
         {
             return this->T_kf_curr;
         }
+	// 
         inline const Eigen::Matrix4f getTransKFtoCurr() const
         {
             return this->T_kf_curr.inverse();
@@ -129,6 +135,7 @@ public:
         //T_W_curr =  T_W_KF * T_KF_CURR
         inline const Eigen::Matrix4f getCurrToWorld() const
         {
+	    // T_w_curr = T_w_kf * T_kf_curr
             return kfFrame->getTransKFtoWorld()*T_kf_curr;
         }
         inline double returnTimestamp() const
@@ -156,6 +163,7 @@ public:
     REVO(const std::string &settingsFile, const std::string &dataSettings, int nRuns);
     ~REVO();
     bool start();
+    // reject from Point Cloud to Image
     float reprojectPCLToImg(const Eigen::MatrixXf& pcl, const Eigen::Matrix3f &R, const Eigen::Vector3f &T,
                             const cv::Mat& img, const cv::Size2i& size,
                             const Eigen::Matrix3f& K, int& goodCount, int& badCount, const std::__cxx11::string &title) const;
@@ -192,7 +200,7 @@ private:
     {
         Eigen::Quaterniond Qf(R);
         std::stringstream tumString;
-        tumString << std::fixed << timeStamp << " " << T[0] << " " << T[1] << " " << T[2] << " " <<  Qf.x() << " " << Qf.y() << " " << Qf.z() << " " << Qf.w();
+        tumString << std::fixed << "timeStamp= " << timeStamp << "; T[0]= " << T[0] << "; T[1]= " << T[1] << "; T[2]= " << T[2] << "; x= " <<  Qf.x() << "; y= " << Qf.y() << "; z= " << Qf.z() << "; w= " << Qf.w();
         return tumString.str();
     }
     static inline std::string poseToTUMString(const Eigen::Matrix4d& pose, const double timeStamp)

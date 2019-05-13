@@ -21,16 +21,16 @@
 #include <memory>
 int main(int argc, char ** argv)
 {
-    if (argc < 2) //first is name of program
+    if (argc < 2) // first is name of program
     {
         I3D_LOG(i3d::error) << "Not enough input arguments: REVO configFile.yaml datasetFile.yaml";
         exit(0);
     }
 
-    //try to convert argument to string
+    // convert argument to string
     const std::string settingsFile = argv[1], datasetFile = argv[2];
     int nRuns = 0;
-    //now start the system
+    // now start the system
     while (true)
     {
         REVO revoSystem(settingsFile,datasetFile,nRuns);
@@ -41,7 +41,7 @@ int main(int argc, char ** argv)
             return EXIT_SUCCESS;
         }
         nRuns++;
-        I3D_LOG(i3d::info) << "nRuns: " << nRuns;
+        I3D_LOG(i3d::info) << "nRuns: " << nRuns <<"\n";
 
     }
     return EXIT_SUCCESS;
