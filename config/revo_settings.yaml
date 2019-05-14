@@ -22,7 +22,7 @@ DO_OUTPUT_POSES: 1 #typically in TUM Format
 # Camera Parameters. Adjust them!
 #--------------------------------------------------------------------------------------------
 
-# Camera calibration and distortion parameters (OpenCV) 
+# Camera calibration and distortion parameters (OpenCV) for freiburg1 camera 
 Camera.fx: 517.306408
 Camera.fy: 516.469215
 Camera.cx: 318.643040
@@ -37,14 +37,14 @@ Camera.k3: 1.163314
 Camera.width: 640
 Camera.height: 480
 
-cannyThreshold1: 150
-cannyThreshold2: 100
+cannyThreshold1: 15
+cannyThreshold2: 10
 
 #dataset
 MainFolder: "dataset"
-#Datasets: ["rgbd_dataset_freiburg1_desk2","rgbd_dataset_freiburg1_xyz"]
+
 Datasets: "rgbd_dataset_freiburg1_desk"
-#Datasets: "rgbd_dataset_freiburg1_desk"
+
 ASSOCIATE: "associate.txt"
 
 #img pyr settings

@@ -177,8 +177,8 @@ TrackerNew::TrackerStatus TrackerNew::assessTrackingQuality(const Eigen::Matrix4
     for (size_t histLvl = 0; histLvl < histogram.size();++histLvl)
     {
         if (histLvl>0) overlapMeasure+= (overlaps.at(histLvl)*histWeights.at(histLvl));
-        I3D_LOG(i3d::info) << "histLvl: " << histLvl << " total " << histogram.at(histLvl) << " overlap: " << overlaps.at(histLvl)
-                           << "percentage: " << float(overlaps.at(histLvl))/histogram.at(histLvl);
+        I3D_LOG(i3d::info) << "histLvl: " << histLvl << "; total: " << histogram.at(histLvl) << "; overlap: " << overlaps.at(histLvl)
+                           << "; percentage: " << float(overlaps.at(histLvl))/histogram.at(histLvl);
     }
     I3D_LOG(i3d::info) << "overlapMeasure: " <<overlapMeasure;
     if (overlapMeasure>=overlaps.at(0) || histogram.size() < 4)// || overlaps.at(histogram.size()-1) > overlaps.at(1)*0.5)
