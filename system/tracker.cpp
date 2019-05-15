@@ -135,7 +135,7 @@ TrackerNew::TrackerStatus TrackerNew::assessTrackingQuality(const Eigen::Matrix4
     //for debugging
     int outOfBounds = 0;
     I3D_LOG(i3d::info) << "mPastPcl.size(): " << mPastPcl.size();
-    for (size_t frame = 0; frame <  mSettings.nFramesHistogramVoting && frame < mPastPcl.size(); ++frame)
+    for (size_t frame = 0; (int)frame <  mSettings.nFramesHistogramVoting && (unsigned)frame < mPastPcl.size(); ++frame)
     {
         histogram.push_back(0);
         overlaps.push_back(0);
@@ -247,7 +247,7 @@ TrackerNew::~TrackerNew()
 
 void TrackerNew::clearUpPastLists()
 {
-    while (mPastPcl.size() > mSettings.nFramesHistogramVoting)
+    while (mPastPcl.size() > (unsigned)mSettings.nFramesHistogramVoting)
     {
         I3D_LOG(i3d::info) << std::fixed << "Deleting: " << mPastTimeStamps.front();
         mPastPcl.pop_front();

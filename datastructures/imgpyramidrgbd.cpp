@@ -32,7 +32,7 @@ ImgPyramidRGBD::ImgPyramidRGBD(const ImgPyramidSettings& settings, const std::sh
 ImgPyramidRGBD::~ImgPyramidRGBD()
 {
 
-    for (int lvl = 0; lvl < optimizationStructure.size();++lvl)
+    for (unsigned lvl = 0; lvl < optimizationStructure.size();++lvl)
     {
         Eigen::internal::aligned_free((void*) optimizationStructure[lvl]);
         optimizationStructure.clear();
@@ -49,6 +49,8 @@ ImgPyramidRGBD::ImgPyramidRGBD(const ImgPyramidSettings& settings, const std::sh
      //Chosen in a way that we always get 32x24 Patches for 3 levels starting from 640x480
      distPatchSizes.push_back(20);distPatchSizes.push_back(10);distPatchSizes.push_back(5);
      rgbFullSize = fullResRgb.clone();
+
+     // matrix gray: convert raw RGB image to gray image
      cv::Mat gray;
      cv::cvtColor(rgbFullSize,gray,cv::COLOR_BGRA2GRAY);
      cv::Mat depth = fullResDepth.clone();
@@ -73,7 +75,7 @@ ImgPyramidRGBD::ImgPyramidRGBD(const ImgPyramidSettings& settings, const std::sh
      //cv::imwrite("./out/edges"+std::to_string(timestamp)+".png",this->edgesPyr[0]);
      //TODO: CONVERT COLOR TO RGB AND ONLY DOWNSIZE
      for (int lvl = 1; lvl < settings.nLevels(); ++lvl)
-     {
+     {  
          auto startLvl = Timer::getTime();
          I3D_LOG(i3d::detail) << "lvl: " << lvl;
          const cv::Size2i currSize = cameraPyr->at(lvl).returnSize();
@@ -94,19 +96,7 @@ ImgPyramidRGBD::ImgPyramidRGBD(const ImgPyramidSettings& settings, const std::sh
      //if (timestamp == 531) exit(0);
      I3D_LOG(i3d::info) << "Time for creating pyramid: " << Timer::getTimeDiffMiS(startPyr,endPyr);
 }
-void ImgPyramidRGBD::getEdges(cv::Mat& edges, const cv::Mat& gray)
-{
-    I3D_LOG(i3d::detail) << mSettings.cannyThreshold1 << " " << mSettings.cannyThreshold2;
 
-    if (mSettings.DO_GAUSSIAN_SMOOTHING_BEFORE_CANNY)
-    {
-        cv::Mat smoothImg;
-        cv::GaussianBlur(gray,smoothImg,cv::Size(7,7),2);
-        cv::Canny(smoothImg,edges,mSettings.cannyThreshold1,mSettings.cannyThreshold2,3,true); //...edges,150,100,...
-    }
-    else
-        cv::Canny(gray,edges,mSettings.cannyThreshold1,mSettings.cannyThreshold2,3,true); //...edges,150,100,...
-}
 
 void ImgPyramidRGBD::fillInEdges(size_t lvl)
 {
@@ -181,7 +171,18 @@ void ImgPyramidRGBD::addLevelEdge(const cv::Mat &gray,const cv::Mat &depth, cons
 
     cv::Mat edges;
     const size_t lvl = static_cast<size_t>(mSettings.PYR_MAX_LVL)+edgesPyr.size();
-    cv::Canny(gray,edges,mSettings.cannyThreshold1,mSettings.cannyThreshold2,3,true);
+    
+    I3D_LOG(i3d::detail) << "cannyThreshold1: " << mSettings.cannyThreshold1 << "; cannyThreshold2: " << mSettings.cannyThreshold2;
+    if (mSettings.DO_GAUSSIAN_SMOOTHING_BEFORE_CANNY)
+    {
+        cv::Mat smoothImg;
+        cv::GaussianBlur(gray,smoothImg,cv::Size(5,5),0);
+        cv::Canny(smoothImg,edges,mSettings.cannyThreshold1,mSettings.cannyThreshold2,3,true); 
+    }
+    else
+        cv::Canny(gray,edges,mSettings.cannyThreshold1,mSettings.cannyThreshold2,3,true);
+
+    // cv::Canny(gray,edges,mSettings.cannyThreshold1,mSettings.cannyThreshold2,3,true);
     this->edgesOrigPyr.push_back(edges.clone());
     this->edgesPyr.push_back(edges);
     const float nPercentage = generateDistHistogram(edges,distPatchSizes[lvl]);
@@ -325,3 +326,4 @@ void ImgPyramidRGBD::generateColoredPcl(uint lvl, Eigen::MatrixXf& clrPcl, bool 
     clrPcl.conservativeResize(clrPcl.rows(),linIdx);
     //clrPcl = clrPcl.leftCols(linIdx;
 }
+

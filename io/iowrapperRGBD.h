@@ -89,7 +89,7 @@ public:
                 I3D_LOG(i3d::error) << "Datasets is not a string sequence! Trying to read string!";
                 datasets.push_back(fs["Datasets"]);
             }
-            I3D_LOG(i3d::info) << "Datasets: " << datasets.size() << "nRuns: "<<nRuns;
+            I3D_LOG(i3d::info) << "Datasets: " << datasets.size() << "; nRuns: "<<nRuns;
             if (nRuns >= int(datasets.size()))
             {
                 I3D_LOG(i3d::info) << "Finished all datasets!";

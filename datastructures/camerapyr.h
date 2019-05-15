@@ -49,14 +49,16 @@ public:
         int height,width;
         cv::read(dataF["height"],height,480);
         cv::read(dataF["width"],width,640);
-        this->height = static_cast<size_t>(height);this->width = static_cast<size_t>(width);
-        I3D_LOG(i3d::info) << "settingsPyr.DEPTH_MIN: " << DEPTH_MIN << "settingsPyr.DEPTH_MAX" << DEPTH_MAX;
+        this->height = static_cast<size_t>(height); this->width = static_cast<size_t>(width);
+        I3D_LOG(i3d::info) << "settingsPyr.DEPTH_MIN= " << DEPTH_MIN << "; settingsPyr.DEPTH_MAX= " << DEPTH_MAX;
+
         float fx,fy,cx,cy;
         //Here, we could also use the standard ROS parameters for 640x480 -> fx = fy = 580
         cv::read(dataF["Camera.fx"],fx,(width+height)/2);
         cv::read(dataF["Camera.fy"],fy,fx);
         cv::read(dataF["Camera.cx"],cx,width/2.0f);
         cv::read(dataF["Camera.cy"],cy,height/2.0f);
+        // intrinsic matrix K
         K = Eigen::Matrix3f::Identity();
         K(0,0) = fx; K(1,1) = fy; K(0,2) = cx; K(1,2) = cy;
         cv::read(dataF["USE_EDGE_HIST"],USE_EDGE_HIST,true);
@@ -64,7 +66,7 @@ public:
         cv::read(dataF["USE_PYR_SMOOTH"],USE_PYR_SMOOTH,true);
         dataF.release();
     }
-
+    // here nLevels = 3
     inline int nLevels() const
     {
         return PYR_MIN_LVL-PYR_MAX_LVL+1;
@@ -116,7 +118,7 @@ public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     CameraPyr(const ImgPyramidSettings& settingsPyr)
     {
-        I3D_LOG(i3d::info) << settingsPyr.cannyThreshold1 << " " <<settingsPyr.cannyThreshold2 << " " << settingsPyr.K;
+        I3D_LOG(i3d::info) << "cannyThreshold1: " << settingsPyr.cannyThreshold1 << "; cannyThreshold2: " <<settingsPyr.cannyThreshold2 << "; K= \n" << settingsPyr.K;
         int nLevels = settingsPyr.nLevels();
         if (nLevels <= 0) return;
         const Eigen::Matrix3f baseCam = settingsPyr.K;
@@ -135,9 +137,10 @@ public:
             fx = newCamMat.at<double>(0,0);fy = newCamMat.at<double>(1,1);
             cx = newCamMat.at<double>(0,2);cy = newCamMat.at<double>(1,2);
         }
-        I3D_LOG(i3d::info) << fx << " " << fy << " " << settingsPyr.nLevels();
+        I3D_LOG(i3d::info) << "fx= " << fx << "; fy= " << fy << "; nLevels= " << settingsPyr.nLevels();
+        // camPyr: vector of class Camera
         camPyr.push_back(Camera(fx,fy,cx,cy,width,height));
-        for (int lvl = 1; lvl <= nLevels;++lvl)
+        for (int lvl = 1;lvl <= nLevels;++lvl)
         {
             const float scale = 1.0f/pow(2,lvl);
             camPyr.push_back(Camera(fx,fy,cx,cy,width,height,scale));
@@ -147,6 +150,7 @@ public:
         for (size_t lvl=0; lvl < camPyr.size();++lvl)
         {
             const Camera cam = camPyr[lvl];
+            // pcl: 4xX matrix, each column (X,Y,Z=1,1) Z can be modified by depth??
             Eigen::Matrix4Xf pcl = Eigen::Matrix4Xf::Zero(4, cam.area);
             for( size_t xx = 0; xx < cam.width ; xx++)
             {
@@ -167,7 +171,7 @@ public:
     {
         if (nLevels <= 0) return;
         camPyr.push_back(Camera(fx,fy,cx,cy,width,height));
-        for (int lvl = 1; lvl <= nLevels;++lvl)
+        for (int lvl = 1;lvl <= nLevels;++lvl)
         {
             const float scale = 1.0/pow(2,lvl);
             camPyr.push_back(Camera(fx,fy,cx,cy,width,height,scale));
@@ -191,3 +195,4 @@ public:
     //std::vector<Eigen::Matrix4Xf, Eigen::aligned_allocator<Eigen::Matrix4Xf>> mPclTemplate;
     std::vector<Eigen::Matrix4Xf> mPclTemplate;
 };
+
