@@ -1,9 +1,9 @@
 %YAML:1.0
 INPUT_TYPE: 0
-DO_GAUSSIAN_SMOOTHING_BEFORE_CANNY: 0
+DO_GAUSSIAN_SMOOTHING_BEFORE_CANNY: 1
 
 #GENERAL
-DO_GENERATE_DENSE_PCL: 0
+DO_GENERATE_DENSE_PCL: 1
 DO_SHOW_DEBUG_IMAGE: 0
 DO_USE_PANGOLIN_VIEWER: 1
 USE_EDGE_HIST: 1
@@ -38,8 +38,8 @@ Camera.k3: 1.163314
 Camera.width: 640
 Camera.height: 480
 
-cannyThreshold1: 15
-cannyThreshold2: 10
+cannyThreshold1: 150
+cannyThreshold2: 100
 
 #dataset
 MainFolder: "dataset"

@@ -30,7 +30,7 @@ void TrackerNew::reprojectRefEdgesToCurrentFrame(const cv::Mat& rgbCurr,const Ei
     cv::Mat edgesInCurrRgb,edgesRefCurr;
     if (rgbCurr.channels()>1)
         rgbCurr.copyTo(edgesInCurrRgb);
-    else//gray
+    else//gray image
     {
         std::vector<cv::Mat> channelsRGB;
         channelsRGB.push_back(rgbCurr);
@@ -50,7 +50,7 @@ void TrackerNew::reprojectRefEdgesToCurrentFrame(const cv::Mat& rgbCurr,const Ei
         Eigen::VectorXf res =  R*pt.head<3>()+t;
         res[0] = fx * res[0]/res[2] + cx;
         res[1] = fy * res[1]/res[2] + cy;
-
+        // if out of boudary set to 255
         if (res[0] >= 0 && res[0] < rgbCurr.cols && res[1] >= 0 && res[1] < rgbCurr.rows)
         {
             const cv::Vec3b clr = cv::Vec3b(0,255,0);
@@ -108,7 +108,8 @@ cv::Mat reprojectRefEdgesToDistTransform(const cv::Mat& dtC,const Eigen::MatrixX
 
 //
 /**
- * @brief TrackerNew::assessTrackingQuality We project old pcls in the current frame using the estimated pose.
+ * @brief TrackerNew::assessTrackingQuality 
+ * We project old pcls in the current frame using the estimated pose.
  * If the quality is not good enough, we take the previous one as keyframe and re-estimate.
  * See Schenk and Fraundorfer, IROS 2017 paper, for a more detailed description
  * @param estimatedPose
@@ -201,7 +202,8 @@ TrackerNew::TrackerStatus TrackerNew::assessTrackingQuality(const Eigen::Matrix4
 }
 
 /**
- * @brief TrackerNew::addOldPclAndPose Addes old pcl to list for tracking quality assessment
+ * @brief TrackerNew:
+ * addOldPclAndPose. Adds old pcl to list for tracking quality assessment
  * @param pcl point cloud to be added
  * @param worldPose
  * @param timeStamp
@@ -215,7 +217,7 @@ void TrackerNew::addOldPclAndPose(const Eigen::MatrixXf& pcl, const Eigen::Matri
 //        mPastWorldPoses.pop_front();
 //        mPastTimeStamps.pop_front();
 //    }
-    I3D_LOG(i3d::info) << std::fixed << "Adding: " << timeStamp;
+    I3D_LOG(i3d::info) << std::fixed << "Adding: timestamp=" << timeStamp;
     mPastPcl.push_back(pcl);
     mPastWorldPoses.push_back(worldPose);
     mPastTimeStamps.push_back(timeStamp);
@@ -256,7 +258,8 @@ void TrackerNew::clearUpPastLists()
     }
 }
 /**
- * @brief TrackerNew::checkInitializationValues Evaluates the cost function at at mRefFrame using the 3D PCl from mCurrFrame R * PCL_curr * T
+ * @brief TrackerNew::checkInitializationValues 
+ * Evaluates the cost function at at mRefFrame using the 3D PCl from mCurrFrame R * PCL_curr + T
  * @param R Rotation from curr to ref
  * @param T Translation from curr to ref
  * @param mCurrFrame current frame
@@ -283,7 +286,8 @@ void TrackerNew::checkInitializationValues(Eigen::Matrix3f &R, Eigen::Vector3f &
 }
 
 /**
- * @brief TrackerNew::trackFrames Estimates the rotation R and translation T from currFrame to refFrame
+ * @brief TrackerNew:
+ * trackFrames Estimates the rotation R and translation T from currFrame to refFrame
  * @param R starts with value given and returns new estimate
  * @param T starts with value given and returns new estimate
  * @param error estimated error
@@ -308,7 +312,7 @@ TrackerNew::TrackerStatus TrackerNew::trackFrames(Eigen::Matrix3f &R, Eigen::Vec
         reprojectRefEdgesToDistTransform(refFrame->returnDistTransform(0),currFrame->return3DEdges(0),currFrame->returnK(0),R,T,refFrame->returnEdges(0));
         //reprojectRefEdgesToCurrentFrame(mRefFrame->returnDistTransform(0),mCurrFrame->return3DEdges(0),mCurrFrame->returnK(0),R,T,mRefFrame->returnEdges(0),"init");
     }
-    I3D_LOG(i3d::info) <<  "Current Frame: " << currFrame->frameId;
+    I3D_LOG(i3d::info) <<  "Current Frame ID: " << currFrame->frameId;
     //std::unique_lock<std::mutex> lock(mTrackerLock);
     auto beginInit = Timer::getTime();
     checkInitializationValues(R,T,currFrame,refFrame);
@@ -334,6 +338,7 @@ TrackerNew::TrackerStatus TrackerNew::trackFrames(Eigen::Matrix3f &R, Eigen::Vec
         //I3D_LOG(i3d::info) << "Building acc structure at lvl: "<<lvl<<": " << Timer::getTimeDiffMs(startAcc,endAcc);
         auto startT = Timer::getTime();
         resInfo.clearAll();
+        // call trackfrmaes in optimizer.cpp to calculate R, t, error
         error = mOptimizer.trackFrames(refFrame,currFrame,R,T,lvl,resInfo);
         auto endT = Timer::getTime();
         I3D_LOG(i3d::info) << "Tracking time for lvl "<<lvl<<": " << Timer::getTimeDiffMiS(startT,endT) << "mis";
@@ -386,9 +391,10 @@ float TrackerNew::evalCostFunction(const Eigen::Matrix3f& R, const Eigen::Vector
                 continue;
             }
             goodCount++;
-            totalCost+=distanceTransform.at<float>(floor(newPt[1]),floor(newPt[0]));
+            totalCost += distanceTransform.at<float>(floor(newPt[1]),floor(newPt[0]));
         }
     }
     //exit(0);
     return totalCost;
 }
+

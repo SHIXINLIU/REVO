@@ -34,6 +34,7 @@ public:
     void getEdges(cv::Mat& edges, const cv::Mat& gray);
     //generates a dense or sparse (edges only) PCL in the respective camera coordiante system
     void generateColoredPcl(uint lvl, Eigen::MatrixXf& clrPcl, bool densePcl) const;
+    void selectiveBlur(const cv::Mat& gray, cv::Mat& smoothImg, int r=5, unsigned threshold=10);
 
     ImgPyramidRGBD(const ImgPyramidSettings& mSettings, const std::shared_ptr<CameraPyr> &cameraPyr);
     ImgPyramidRGBD(const ImgPyramidSettings& mSettings, const std::shared_ptr<CameraPyr> &cameraPyr, const cv::Mat& fullResRgb, const  cv::Mat& fullResDepth,

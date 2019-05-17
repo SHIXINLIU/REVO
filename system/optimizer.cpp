@@ -90,6 +90,7 @@ float Optimizer::calcErrorAndBuffers(const std::shared_ptr<ImgPyramidRGBD> & ref
     {
         const Eigen::Vector4f refPoint = currPcl.col(c); //first three are the vector
         //IDEA: Use far points only for rotation!
+        // (u_new, v_new): new point reprojected to frame
         const Eigen::Vector3f Wxp = R * refPoint.head<3>() + T;
         const float u_new = Wxp[0]/Wxp[2]*cam.fx + cam.cx;
         const float v_new = Wxp[1]/Wxp[2]*cam.fy + cam.cy;
@@ -204,7 +205,7 @@ void Optimizer::calculateWarpUpdate(LGS6 &ls, int goodPoints)
         float gy = *(buf_warped_dy+i);
 
 
-        // step 3 + step 5 comp 6d error vector
+        // step 3 + step 5 compute 6d error vector
         //isDepth = false;
 
         Vector6 v;
@@ -232,6 +233,8 @@ void Optimizer::calculateWarpUpdate(LGS6 &ls, int goodPoints)
     // solve ls
     ls.finish();
 }
+
+// compute optimal R,t, return the smallest error
 float Optimizer::trackFrames(const std::shared_ptr<ImgPyramidRGBD> &refFrame, const std::shared_ptr<ImgPyramidRGBD> &currFrame,
                              Eigen::Matrix3f &R, Eigen::Vector3f &T, int lvl, ResidualInfo& resInfo)
 {
@@ -386,3 +389,4 @@ float Optimizer::trackFrames(const std::shared_ptr<ImgPyramidRGBD> &refFrame, co
 //    T = referenceToFrame.translation();//.cast<float>();
 //    return last_residual;
 //}
+

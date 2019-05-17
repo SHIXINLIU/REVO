@@ -175,8 +175,10 @@ void ImgPyramidRGBD::addLevelEdge(const cv::Mat &gray,const cv::Mat &depth, cons
     I3D_LOG(i3d::detail) << "cannyThreshold1: " << mSettings.cannyThreshold1 << "; cannyThreshold2: " << mSettings.cannyThreshold2;
     if (mSettings.DO_GAUSSIAN_SMOOTHING_BEFORE_CANNY)
     {
-        cv::Mat smoothImg;
+        cv::Mat smoothImg = gray.clone();
+	//selectiveBlur(gray,smoothImg,5,5);
         cv::GaussianBlur(gray,smoothImg,cv::Size(5,5),0);
+	//cv::medianBlur(gray,smoothImg,5);
         cv::Canny(smoothImg,edges,mSettings.cannyThreshold1,mSettings.cannyThreshold2,3,true); 
     }
     else
@@ -326,4 +328,34 @@ void ImgPyramidRGBD::generateColoredPcl(uint lvl, Eigen::MatrixXf& clrPcl, bool 
     clrPcl.conservativeResize(clrPcl.rows(),linIdx);
     //clrPcl = clrPcl.leftCols(linIdx;
 }
+
+
+
+// my selective blur
+void ImgPyramidRGBD::selectiveBlur(const cv::Mat& gray, cv::Mat& smoothImg, int r, unsigned threshold)
+{
+    for(int i=r;i<gray.rows-r;i++){
+        for(int j=r;j<gray.cols-r;j++){
+            double sum = 0; // sum of weighted intensities in the kernel
+            double weight = 0; // sum of weights in the kernel
+	    int pixel = gray.at<double>(i,j);
+            cv::Mat A =gray(cv::Range(i-r,i+r),cv::Range(j-r,j+r)).clone();
+            for(int m=0;m<2*r+1;m++){
+                for(int n=0;n<2*r+1;n++){
+                    if( abs(A.at<double>(m,n)-pixel) <= threshold ){
+                        sum += A.at<double>(m,n);
+                        weight += 1;
+                    }
+                }
+            }
+	    if(weight!=0)  smoothImg.at<double>(i,j) = sum/weight;
+	    else   smoothImg.at<double>(i,j) = gray.at<double>(i,j);
+
+        }
+    }
+    I3D_LOG(i3d::detail) << "------Selective blur finished!------";
+}
+
+
+
 
