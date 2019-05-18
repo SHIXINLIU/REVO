@@ -1,22 +1,3 @@
-/**
-* This file is part of REVO.
-*
-* Copyright (C) 2014-2017 Schenk Fabian <schenk at icg dot tugraz dot at> (Graz University of Technology)
-* For more information see <https://github.com/fabianschenk/REVO/>
-*
-* REVO is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-*
-* REVO is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with REVO. If not, see <http://www.gnu.org/licenses/>.
-*/
 #include "system.h"
 #include "../utils/timer.h"
 #include <iomanip>
@@ -25,7 +6,7 @@
 #include <sophus/se3.hpp>
 REVO::REVO(const std::string& settingsFile, const std::string& dataSettings,int nRuns = 0):
 
-    mSettings(settingsFile,dataSettings,nRuns), camPyr(new CameraPyr(mSettings.settingsPyr))//,windowedOptimization(mSettings.settingsWO)
+    mSettings(settingsFile,dataSettings,nRuns), camPyr(new CameraPyr(mSettings.settingsPyr))
 {
     I3D_LOG(i3d::debug) << "SystemRGBD constructor";
     isFinished = true;
@@ -47,7 +28,6 @@ REVO::REVO(const std::string& settingsFile, const std::string& dataSettings,int 
     I3D_LOG(i3d::detail) << "after wrapper thread!";
     if (mSettings.DO_OUTPUT_POSES && !mSettings.settingsIO.isFinished)
     {
-	//
         const std::string poseFileName("dataset/poses_"+mSettings.settingsIO.subDataset+".txt");
         mPoseFile.open((mSettings.outputFolder+poseFileName).c_str(),std::ios_base::out);
         if (!mPoseFile.is_open())
@@ -108,7 +88,7 @@ bool REVO::start()
     // T_NM1_N: transformation from frame N to frame N-1
     Eigen::Matrix4f T_NM1_N = Eigen::Matrix4f::Identity();
     //ImgPyramidRGBD prevPyr(mConfig.pyrConfig,mCamPyr);
-    mTracker = std::unique_ptr<TrackerNew>(new TrackerNew(mSettings.settingsTracker,mSettings.settingsPyr));//,camPyr));
+    mTracker = std::unique_ptr<TrackerNew>(new TrackerNew(mSettings.settingsTracker,mSettings.settingsPyr));
     /* System start up end*/
     /*Initializations*/
     uint noFrames = 0, noTrackingLost = 0;
@@ -213,7 +193,7 @@ bool REVO::start()
         if (trackerStatus == TrackerNew::TRACKER_STATE_NEW_KF && !justAddedNewKeyframe)
         {
             //make previous keyframe!
-            //kfPyr.swap(prevPyr);
+            
             kfPyr = prevPyr;
             kfPyr->setTwf(mPoseGraph.back().getCurrToWorld());
             kfPyr->makeKeyframe();
@@ -281,7 +261,7 @@ bool REVO::start()
         T = T_init.block<3,1>(0,3);
         Eigen::Matrix4f absPose = mPoseGraph.back().getCurrToWorld();//startPose*currPoseInWorld;
         I3D_LOG(i3d::debug) <<"MY abs pose: " << poseToTUMString(absPose.cast<double>(),tumRefTimestamp);
-        //I3D_LOG(i3d::debug) << "TUM abs pose: "<< poseToTUMString(mTumReader->getAbsPose(tumRefTimestamp),tumRefTimestamp);
+
         if (mSettings.DO_OUTPUT_POSES) writePose(absPose.block<3,3>(0,0),absPose.block<3,1>(0,3),tumRefTimestamp);
 #ifdef WITH_PANGOLIN_VIEWER
         if (mSettings.DO_USE_PANGOLIN_VIEWER)
@@ -329,7 +309,7 @@ float REVO::reprojectPCLToImg(const Eigen::MatrixXf& pcl, const Eigen::Matrix3f&
     {
         const Eigen::VectorXf pt = pcl.col(ir).head<3>();
         Eigen::VectorXf newPt = R*pt+T;
-        //std::cout << pt << std::endl;
+
         newPt[0] = fx * newPt[0]/newPt[2] + cx;
         newPt[1] = fy * newPt[1]/newPt[2] + cy;
         if (newPt[0] >= 0 && newPt[0] < size.width && newPt[1] >= 0 && newPt[1] < size.height)

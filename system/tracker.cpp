@@ -1,26 +1,7 @@
-/**
-* This file is part of REVO.
-*
-* Copyright (C) 2014-2017 Schenk Fabian <schenk at icg dot tugraz dot at> (Graz University of Technology)
-* For more information see <https://github.com/fabianschenk/REVO/>
-*
-* REVO is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-*
-* REVO is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with REVO. If not, see <http://www.gnu.org/licenses/>.
-*/
 #include "tracker.h"
 #include <iomanip>
 #include <opencv2/highgui.hpp>
-/// DEBUG FUNCTIONS START
+
 void TrackerNew::reprojectRefEdgesToCurrentFrame(const cv::Mat& rgbCurr,const Eigen::MatrixXf& _3d, const Eigen::Matrix3f& K,
                                         const Eigen::Matrix3f& R, const Eigen::Vector3f &t, const cv::Mat& edgesCurr,
                                         const std::string title) const
@@ -38,7 +19,7 @@ void TrackerNew::reprojectRefEdgesToCurrentFrame(const cv::Mat& rgbCurr,const Ei
         channelsRGB.push_back(rgbCurr);
         cv::merge(channelsRGB,edgesInCurrRgb);
     }
-    //edgesCurr.copyTo(edgesRefCurr);
+
     std::vector<cv::Mat> channels;
     channels.push_back(edgesCurr);
     channels.push_back(edgesCurr);
@@ -61,10 +42,9 @@ void TrackerNew::reprojectRefEdgesToCurrentFrame(const cv::Mat& rgbCurr,const Ei
     cv::imshow("edgesInCurrRgb "+title,edgesInCurrRgb);
     cv::imshow("edgesRefCurr "+title,edgesRefCurr);
     I3D_LOG(i3d::info) << "Before write!";
-    //cv::imwrite("edgesInCurrRgb_"+title+".png",edgesInCurrRgb);
-    //cv::imwrite("edgesRefCurr_"+title+".png",edgesRefCurr);
+    
     cv::waitKey(0);
-    return;// edgesInCurrRgb;
+    return;
 }
 cv::Mat reprojectRefEdgesToDistTransform(const cv::Mat& dtC,const Eigen::MatrixXf& _3d, const Eigen::Matrix3f& K,
                                         const Eigen::Matrix3f& R, const Eigen::Vector3f &t, const cv::Mat& edgesCurr,
@@ -83,9 +63,7 @@ cv::Mat reprojectRefEdgesToDistTransform(const cv::Mat& dtC,const Eigen::MatrixX
     for( int ir=0 ; ir<_3d.cols() ; ir++ )
     {
         Eigen::VectorXf pt = _3d.col(ir);
-        //std::cout << pt << std::endl;
-
-        //Eigen::VectorXd res = R.transpose()*(pt-t);
+        
         Eigen::VectorXf res;
         if (USE_FORWARD)
             res =  R*pt+t;
@@ -104,7 +82,6 @@ cv::Mat reprojectRefEdgesToDistTransform(const cv::Mat& dtC,const Eigen::MatrixX
     cv::waitKey(0);
     return dt_new;
 }
-/// DEBUG FUNCTIONS END
 
 //
 /**
@@ -210,13 +187,6 @@ TrackerNew::TrackerStatus TrackerNew::assessTrackingQuality(const Eigen::Matrix4
  */
 void TrackerNew::addOldPclAndPose(const Eigen::MatrixXf& pcl, const Eigen::Matrix4f& worldPose, const double timeStamp)
 {
-    //delete first one if larger than nFramesHistogramVoting
-//    if (mPastPcl.size() > mConfig.nFramesHistogramVoting && false)
-//    {
-//        mPastPcl.pop_front();
-//        mPastWorldPoses.pop_front();
-//        mPastTimeStamps.pop_front();
-//    }
     I3D_LOG(i3d::info) << std::fixed << "Adding: timestamp=" << timeStamp;
     mPastPcl.push_back(pcl);
     mPastWorldPoses.push_back(worldPose);
@@ -243,10 +213,10 @@ TrackerNew::~TrackerNew()
     mPastWorldPoses.clear();
 
 }
+
 /**
  * @brief TrackerNew::clearUpPastLists clears the pcl lists used for tracking quality assessment
  */
-
 void TrackerNew::clearUpPastLists()
 {
     while (mPastPcl.size() > (unsigned)mSettings.nFramesHistogramVoting)
@@ -257,6 +227,7 @@ void TrackerNew::clearUpPastLists()
         mPastTimeStamps.pop_front();
     }
 }
+
 /**
  * @brief TrackerNew::checkInitializationValues 
  * Evaluates the cost function at at mRefFrame using the 3D PCl from mCurrFrame R * PCL_curr + T
@@ -319,32 +290,23 @@ TrackerNew::TrackerStatus TrackerNew::trackFrames(Eigen::Matrix3f &R, Eigen::Vec
     auto endInit = Timer::getTime();
     I3D_LOG(i3d::info) << "checkInitializationValues: " << Timer::getTimeDiffMiS(beginInit,endInit) << "mis";
     error = INFINITY;
-    //std::vector<std::shared_ptr<ImgPyramidRGBD>> testVec;
-    //testVec.push_back(currFrame);
-    //Eigen::Matrix3d R_d = R.cast<double>();
-    //Eigen::Vector3d T_d = T.cast<double>();
+    
     Optimizer::ResidualInfo resInfo;
-    //for (int lvl = 0; lvl >= mPyrConfig.maxLevel;--lvl)
+    
     for (int lvl = mPyrConfig.PYR_MIN_LVL; lvl >= mPyrConfig.PYR_MAX_LVL;--lvl)
     {
 
         I3D_LOG(i3d::warning) << "----LEVEL----" << lvl;// << " curr: " << std::fixed << currFrame->returnTimestamp() << " to " << refFrame->returnTimestamp();
         I3D_LOG(i3d::detail) << "Rinit: " << R;
         I3D_LOG(i3d::detail) << "tinit: " << T.transpose();
-        //perform tracking
-       // auto startAcc = Timer::getTime();
-        //mOptimizer.buildAccelerationStructure(refFrame->returnDistTransform(lvl),lvl);
-        //auto endAcc = Timer::getTime();
-        //I3D_LOG(i3d::info) << "Building acc structure at lvl: "<<lvl<<": " << Timer::getTimeDiffMs(startAcc,endAcc);
-        auto startT = Timer::getTime();
+       
         resInfo.clearAll();
         // call trackfrmaes in optimizer.cpp to calculate R, t, error
         error = mOptimizer.trackFrames(refFrame,currFrame,R,T,lvl,resInfo);
         auto endT = Timer::getTime();
         I3D_LOG(i3d::info) << "Tracking time for lvl "<<lvl<<": " << Timer::getTimeDiffMiS(startT,endT) << "mis";
     }
-    //R = R_d.cast<float>();
-    //T = T_d.cast<float>();
+    
     if (mSettings.optimizerSettings.DO_SHOW_DEBUG_IMAGES)
     {
         reprojectRefEdgesToCurrentFrame(refFrame->returnGray(0),currFrame->return3DEdges(0),currFrame->returnK(0),R,T,refFrame->returnEdges(0), "after");
@@ -366,13 +328,13 @@ float TrackerNew::evalCostFunction(const Eigen::Matrix3f& R, const Eigen::Vector
     const float fx = K(0,0), fy = K(1,1);
     const float cx = K(0,2), cy = K(1,2);
     float totalCost = 0;
-    //I3D_LOG(i3d::info) << "K: " << K;
+
     const Eigen::MatrixXf _3d = mCurrFrame->return3DEdges(minLvl);
     const cv::Size2i size = mCurrFrame->cameraPyr->at(minLvl).returnSize();
     cv::Mat distanceTransform= mRefFrame->returnDistTransform(minLvl);
     double min,max;
     cv::minMaxIdx(distanceTransform,&min,&max);
-	//
+
     cv::imwrite("dataset/dist_trans.png",distanceTransform/max*255);
     for( int ir=0 ; ir<_3d.cols() ; ir++ )
     {
@@ -381,7 +343,7 @@ float TrackerNew::evalCostFunction(const Eigen::Matrix3f& R, const Eigen::Vector
         int badCount = 0, goodCount=0;
         newPt[0] = fx * newPt[0]/newPt[2] + cx;
         newPt[1] = fy * newPt[1]/newPt[2] + cy;
-        //I3D_LOG(i3d::info) << ir << ": " << newPt.transpose();
+
         if (newPt[0] >= 0 && newPt[0] < size.width && newPt[1] >= 0 && newPt[1] < size.height)
         {
             const float residual = distanceTransform.at<float>(floor(newPt[1]),floor(newPt[0]));
@@ -394,7 +356,6 @@ float TrackerNew::evalCostFunction(const Eigen::Matrix3f& R, const Eigen::Vector
             totalCost += distanceTransform.at<float>(floor(newPt[1]),floor(newPt[0]));
         }
     }
-    //exit(0);
     return totalCost;
 }
 

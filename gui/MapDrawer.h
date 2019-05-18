@@ -1,26 +1,6 @@
-/**
-* This file is part of REVO.
-*
-* Copyright (C) 2014-2017 Schenk Fabian <schenk at icg dot tugraz dot at> (Graz University of Technology)
-* For more information see <https://github.com/fabianschenk/REVO/>
-*
-* REVO is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-*
-* REVO is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with REVO. If not, see <http://www.gnu.org/licenses/>.
-*
-*
-* This viewer was partly adapted from ORB-SLAM2 <https://github.com/raulmur/ORB_SLAM2>!
-*/
-
+/*
+ * This viewer was partly adapted from ORB-SLAM2 <https://github.com/raulmur/ORB_SLAM2>!
+ */
 #pragma once
 //#include <Eigen/StdVector>
 //#include <Eigen/StdDeque>
@@ -119,13 +99,8 @@ public:
         kfFile << "ply\nformat ascii 1.0\nelement vertex "<<vpKfsF.size()*5<<"\n";
         kfFile << "property float32 x\nproperty float32 y\nproperty float32 z\nproperty uchar red\nproperty uchar green\nproperty uchar blue\n";
         kfFile << "element edge "<< vpKfsF.size() * 9 - 1 <<"\nproperty int vertex1\nproperty int vertex2\nproperty uchar red\nproperty uchar green\nproperty uchar blue\nend_header\n";
-//        element edge 5                        { five edges in object }
-//        property int vertex1                  { index to first vertex of edge }
-//        property int vertex2                  { index to second vertex }
-//        property uchar red                    { start of edge color }
-//        property uchar green
-//        property uchar blue
-//        kfFile << "end_header\n"
+
+
         const float w = 0.1;
         const float h = w*0.75;
         const float z = w*0.6;
@@ -138,7 +113,7 @@ public:
 
             const Eigen::Matrix3f R = currPose.block<3,3>(0,0);
             const Eigen::Vector3f T = currPose.block<3,1>(0,3);
-            //const Eigen::Vector3f camCenter = -R.transpose()*T;
+
             const Eigen::Vector3f camCenter = T;
             const Eigen::Vector3f pt1 = R*corner1+T,pt2 = R*corner2+T,pt3 = R*corner3+T,pt4 = R*corner4+T;
             //camera center
@@ -172,7 +147,6 @@ public:
     //Read pcls from the queue and then move them to the GPU!
     bool returnLastKfPcl(Eigen::MatrixXf& kfPcl)//, Eigen::Matrix4f& T_w_c)
     {
-        //
         if (pclKfsClr.size()>0)
         {
             std::unique_lock<std::mutex> lock(this->mPclMutex);

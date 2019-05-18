@@ -1,22 +1,3 @@
-/**
-* This file is part of REVO.
-*
-* Copyright (C) 2014-2017 Schenk Fabian <schenk at icg dot tugraz dot at> (Graz University of Technology)
-* For more information see <https://github.com/fabianschenk/REVO/>
-*
-* REVO is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-*
-* REVO is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with REVO. If not, see <http://www.gnu.org/licenses/>.
-*/
 #pragma once
 #include "../datastructures/imgpyramidrgbd.h"
 #include <opencv2/opencv.hpp>
@@ -140,7 +121,6 @@ public:
     int READ_N_IMAGES;
     float DEPTH_SCALE_FACTOR;
     bool useDepthTimeStamp;
-    //bool DO_ADAPT_CANNY_VALUES;
     bool DO_WAIT_AUTOEXP;
     std::vector<std::string> datasets;
     cv::Size2i imgSize;
@@ -162,7 +142,7 @@ private:
     bool mQuitFlag;
     cv::Mat rgb,depth;
     int nFrames;
-    //std::queue<ImgPyramidRGBD> mPyrQueue;
+
     std::queue<std::unique_ptr<ImgPyramidRGBD>> mPyrQueue;
     std::mutex mtx;
     bool mFinish;
@@ -190,7 +170,7 @@ private:
 #ifdef WITH_ORBBEC_ASTRA
         std::unique_ptr<OrbbecAstraOpenNIEngine> orbbecAstraSensor;
 #endif
-    //void adaptCannyValues();
+
     void generateImgPyramidFromAstraPro();
     void generateImgPyramidFromAstra();
     void generateImgPyramidFromRealSense();
@@ -217,7 +197,6 @@ public:
     //~IOWrapperRGBD();
     inline bool isImgPyramidAvailable()
     {
-        //std::unique_lock<std::mutex> lock(this->mtx);
         I3D_LOG(i3d::detail) << "isImgPyramidAvailable";
         return mPyrQueue.size() > 0;
     }

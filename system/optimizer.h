@@ -1,23 +1,4 @@
-/**
-* This file is part of REVO.
-*
-* Copyright (C) 2014-2017 Schenk Fabian <schenk at icg dot tugraz dot at> (Graz University of Technology)
-* For more information see <https://github.com/fabianschenk/REVO/>
-*
-* REVO is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-*
-* REVO is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with REVO. If not, see <http://www.gnu.org/licenses/>.
-*
-*
+/*
 * This optimizer is a modified version of LSD-SLAM's SE3 Tracker http://vision.in.tum.de/lsdslam
 * "LSD-SLAM: Large-scale direct monocular SLAM, Engel et al., ECCV 2014"
 */
@@ -36,9 +17,7 @@
 //using namespace lsd_slam;
 #define PYRAMID_LEVELS 6
 using namespace lsd_slam;
-/**
- * This optimizer is a modified version of "LSD-SLAM: Large-scale direct monocular SLAM, Engel et al., ECCV 2014"
- */
+
 class OptimizerSettings
 {
 public:
@@ -167,8 +146,7 @@ public:
     ~Optimizer();
     float trackFrames(const std::shared_ptr<ImgPyramidRGBD> &refFrame,const std::shared_ptr<ImgPyramidRGBD> &currFrame,
                                  Eigen::Matrix3f &R, Eigen::Vector3f &T, int lvl, ResidualInfo& resInfo);
-    //float trackFrames(const std::shared_ptr<ImgPyramidRGBD> &refFrame, const std::shared_ptr<ImgPyramidRGBD> &currFrame,
-    //                             Eigen::Matrix3d &R, Eigen::Vector3d &T, int lvl, ResidualInfo& resInfo);
+    
     //Bilinear interpolation
     inline Eigen::Vector3f getInterpolatedElement43(const Eigen::Vector4f* const mat, const float x, const float y, const int width) const
     {

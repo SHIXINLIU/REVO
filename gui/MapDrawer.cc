@@ -1,26 +1,3 @@
-/**
-* This file is part of REVO.
-*
-* Copyright (C) 2014-2017 Schenk Fabian <schenk at icg dot tugraz dot at> (Graz University of Technology)
-* For more information see <https://github.com/fabianschenk/REVO/>
-*
-* REVO is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-*
-* REVO is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with REVO. If not, see <http://www.gnu.org/licenses/>.
-*
-*
-* This viewer was partly adapted from ORB-SLAM2 <https://github.com/raulmur/ORB_SLAM2>!
-*/
-
 #include "MapDrawer.h"
 #include <pangolin/pangolin.h>
 #include <mutex>
@@ -52,13 +29,12 @@ void MapDrawer::DrawKeyFramesCurr()
     const float h = w*0.75f;
     const float z = w*0.6f;
     std::unique_lock<std::mutex> lock(this->mFrameMutex);
-    //drawnTill++;
+    
     for(size_t i=0; i<vpKfs.size(); i++)
     {
-        Eigen::Matrix4f Twc = vpKfs.at(i).cast<float>();//pKF->GetPoseInverse().t();
-        //Twc = Twc.inverse().eval();
+        Eigen::Matrix4f Twc = vpKfs.at(i).cast<float>();
         glPushMatrix();
-        //glMultMatrixf(Twc<GLfloat>(0));
+
         glMultMatrixf((float*)Twc.data());
 
         glLineWidth(mKeyFrameLineWidth);
@@ -90,11 +66,12 @@ void MapDrawer::DrawKeyFramesCurr()
    mMapNeedsUpdate = false;
 
 }
+
 //Draws a second trajecotry
 void MapDrawer::DrawOptFrameTrajectory()
 {
     if (vpOptFrames.size()==0) return;
-    //drawnTill++;
+
     glLineWidth(mKeyFrameLineWidth);
     glColor3f(0.0f,1.0f,0.0f);
     glBegin(GL_LINES);
@@ -180,11 +157,6 @@ void MapDrawer::DrawCurrentCamera(pangolin::OpenGlMatrix &Twc)
 }
 
 
-//void MapDrawer::SetCurrentCameraPose(const cv::Mat &Tcw)
-//{
-//    unique_lock<mutex> lock(mMutexCamera);
-//    mCameraPose = Tcw.clone();
-//}
 void MapDrawer::SetCurrentCameraPose(const Eigen::Matrix4f& Tcw)
 {
     unique_lock<mutex> lock(mMutexCamera);

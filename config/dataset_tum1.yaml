@@ -1,28 +1,14 @@
 %YAML:1.0
-INPUT_TYPE: 0
-DO_GAUSSIAN_SMOOTHING_BEFORE_CANNY: 1
 
-#GENERAL
-DO_GENERATE_DENSE_PCL: 1
-DO_SHOW_DEBUG_IMAGE: 0
-DO_USE_PANGOLIN_VIEWER: 1
-USE_EDGE_HIST: 1
+#--------------dataset path-------------
+MainFolder: "dataset"
 
-#Tracker
-CHECK_TRACKING_RESULTS: 1
-CHECK_INIT_VALUES: 1
-USE_EDGE_FILTER: 1
-N_FRAMES_HIST_VOTING: 3
+Datasets: "rgbd_dataset_freiburg1_desk"
 
-#Output Settings
-DO_OUTPUT_POSES: 1 #typically in TUM Format
+ASSOCIATE: "associate.txt"
 
-%YAML:1.0
 
-#--------------------------------------------------------------------------------------------
-# Camera Parameters. Adjust them!
-#--------------------------------------------------------------------------------------------
-
+# Camera Parameters. Adjust them for your camera!
 # Camera calibration and distortion parameters (OpenCV) for freiburg1 camera 
 Camera.fx: 517.306408
 Camera.fy: 516.469215
@@ -40,13 +26,6 @@ Camera.height: 480
 
 cannyThreshold1: 150
 cannyThreshold2: 100
-
-#dataset
-MainFolder: "dataset"
-
-Datasets: "rgbd_dataset_freiburg1_desk"
-
-ASSOCIATE: "associate.txt"
 
 #img pyr settings
 #Pyramid Settings: 0 is img resolution (e.g. 640x480), then always factor 2 smaller

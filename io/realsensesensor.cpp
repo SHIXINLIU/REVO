@@ -1,22 +1,3 @@
-/**
-* This file is part of REVO.
-*
-* Copyright (C) 2014-2017 Schenk Fabian <schenk at icg dot tugraz dot at> (Graz University of Technology)
-* For more information see <https://github.com/fabianschenk/REVO/>
-*
-* REVO is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-*
-* REVO is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with REVO. If not, see <http://www.gnu.org/licenses/>.
-*/
 #include "realsensesensor.h"
 #include "../utils/Logging.h"
 RealsenseSensor::RealsenseSensor()
@@ -30,7 +11,6 @@ RealsenseSensor::RealsenseSensor()
 
     sensor = ctx.get_device(0);
     // This tutorial will access only a single device, but it is trivial to extend to multiple devices
-    //rs::device * dev = ctx.get_device(0);
     printf("\nUsing device 0, an %s\n", sensor->get_name());
     printf("    Serial number: %s\n", sensor->get_serial());
     printf("    Firmware version: %s\n", sensor->get_firmware_version());

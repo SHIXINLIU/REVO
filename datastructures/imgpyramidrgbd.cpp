@@ -1,25 +1,7 @@
-/**
-* This file is part of REVO.
-*
-* Copyright (C) 2014-2017 Schenk Fabian <schenk at icg dot tugraz dot at> (Graz University of Technology)
-* For more information see <https://github.com/fabianschenk/REVO/>
-*
-* REVO is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-*
-* REVO is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with REVO. If not, see <http://www.gnu.org/licenses/>.
-*/
 #include "imgpyramidrgbd.h"
 #include "../utils/timer.h"
 #include <opencv2/highgui.hpp>
+
 std::vector<double> ImgPyramidRGBD::dtTimes;
 
 ImgPyramidRGBD::ImgPyramidRGBD(const ImgPyramidSettings& settings, const std::shared_ptr<CameraPyr> &cameraPyr):
@@ -70,9 +52,7 @@ ImgPyramidRGBD::ImgPyramidRGBD(const ImgPyramidSettings& settings, const std::sh
      auto endLvl = Timer::getTime();
      I3D_LOG(i3d::info) << "AddLevel 0: " << Timer::getTimeDiffMiS(startLvl,endLvl);
      I3D_LOG(i3d::info) << "Time for creating pyramid after 0: " << Timer::getTimeDiffMiS(startPyr,endLvl);
-//     cv::imwrite("./out/depth"+std::to_string(timestamp)+".png",depth);
-//     cv::imwrite("./out/gray"+std::to_string(timestamp)+".png",gray);
-     //cv::imwrite("./out/edges"+std::to_string(timestamp)+".png",this->edgesPyr[0]);
+
      //TODO: CONVERT COLOR TO RGB AND ONLY DOWNSIZE
      for (int lvl = 1; lvl < settings.nLevels(); ++lvl)
      {  
@@ -93,7 +73,7 @@ ImgPyramidRGBD::ImgPyramidRGBD(const ImgPyramidSettings& settings, const std::sh
 
      }
      auto endPyr = Timer::getTime();
-     //if (timestamp == 531) exit(0);
+     
      I3D_LOG(i3d::info) << "Time for creating pyramid: " << Timer::getTimeDiffMiS(startPyr,endPyr);
 }
 
@@ -104,19 +84,11 @@ void ImgPyramidRGBD::fillInEdges(size_t lvl)
     const cv::Mat dist = histPyr[lvl]; //get top level
     const cv::Mat topEdges = edgesPyr[lvl-1]; //get top level
     cv::Mat edgesMod = edgesPyr[lvl];
-    //cv::imwrite("edges_"+std::to_string(lvl-1)+".png",topEdges);
-    //cv::imwrite("edges_"+std::to_string(lvl)+".png",edgesMod);
-//    cv::imshow("lvl_0",edgesPyr[0]);
-//    cv::waitKey(0);
-//    cv::imshow("lvl_1",edgesPyr[1]);
-//    cv::waitKey(0);
+    
     const int PATCH_SIZE = this->distPatchSizes[lvl];
     const int PATCH_SIZE_2=PATCH_SIZE*PATCH_SIZE;
     const int PATCH_SIZE_LOW = this->distPatchSizes[lvl-1];
-    //I3D_LOG(i3d::info) << "edges: " << edgesMod.size() << "PATCH_SIZE: " << PATCH_SIZE << " LOW: "<<PATCH_SIZE_LOW << dist;
-    //cv::imshow("edgesTop: ", topEdges);
-//    cv::imshow("edgesPrev: ", edgesMod);
-//    cv::imshow("dist",dist*(255.0/PATCH_SIZE_2));
+    
     for (int yy = 0; yy < topEdges.rows;++yy)
         for (int xx = 0; xx < topEdges.cols;++xx)
         {
@@ -124,14 +96,10 @@ void ImgPyramidRGBD::fillInEdges(size_t lvl)
             {
                 if (topEdges.at<u_int8_t>(yy,xx)>0)
                     edgesMod.at<u_int8_t>(floor(yy/2),floor(xx/2)) = 255 ;
-                //if (topEdges.at<u_int8_t>(yy,xx)>0)
-                //edgesMod.at<u_int8_t>(floor(yy/2),floor(xx/2)) += topEdges.at<u_int8_t>(yy,xx);
+                
             }
         }
-    //cv::imwrite("edgesMod"+std::to_string(lvl)+".png",edgesMod);
-//    cv::imshow("edgesMod", edgesMod);
-//    cv::imwrite("dist"+std::to_string(lvl)+".png",dist*(255.0/PATCH_SIZE_2));
-//    cv::waitKey(0);
+    
 }
 float ImgPyramidRGBD::generateDistHistogram(const cv::Mat& edges, int PATCH_SIZE)
 {
@@ -143,31 +111,22 @@ float ImgPyramidRGBD::generateDistHistogram(const cv::Mat& edges, int PATCH_SIZE
             if (edges.at<u_int8_t>(yy,xx) > 0)
                 dist.at<u_int8_t>(floor(yy/PATCH_SIZE),floor(xx/PATCH_SIZE))++;//= dist.at<u_int8_t>(floor(yy/PATCH_SIZE),floor(xx/PATCH_SIZE))+1;
 
-                //dist.at<u_int8_t>(floor(yy/PATCH_SIZE),floor(xx/PATCH_SIZE))= dist.at<u_int8_t>(floor(yy/PATCH_SIZE),floor(xx/PATCH_SIZE))+1;
+
         }
     I3D_LOG(i3d::detail) << "After for!";
     const int nDist = cv::countNonZero(dist);
     I3D_LOG(i3d::detail) << "After countNonZero!";
-    //int nEdges = cv::countNonZero(edges);
-    //I3D_LOG(i3d::info) << "edges: " << edges.size() << " " << nEdges << " percent: " << double(nEdges)/edges.total() << "dist: " <<  nDist << "=> percent " << double(nDist)/(32.0f*24.0f);
-    //cv::imshow("topEdges",topEdges);
-    //cv::imshow("edgesHist",edges);
+    
     this->histPyr.push_back(dist);
-    //int max_dist = PATCH_SIZE*PATCH_SIZE;
+
     return float(nDist)/float(dist.total());
-    //cv::imshow("dist",dist*(255.0/max_dist));
-    //cv::imwrite("dist_"+std::to_string(PATCH_SIZE)+".png",dist);
-//    cv::imwrite("edge_"+std::to_string(PATCH_SIZE)+".png",edges);
-//    cv::waitKey(0);
+    
 }
 void ImgPyramidRGBD::addLevelEdge(const cv::Mat &gray,const cv::Mat &depth, const Camera& cam)
 {
     clock_t start = clock();
     this->grayPyr.push_back(gray);
     this->depthPyr.push_back(depth);
-//    cv::imshow("gray",gray);
-//    cv::imshow("depth",depth);
-//    cv::waitKey(0);
 
     cv::Mat edges;
     const size_t lvl = static_cast<size_t>(mSettings.PYR_MAX_LVL)+edgesPyr.size();
@@ -176,7 +135,6 @@ void ImgPyramidRGBD::addLevelEdge(const cv::Mat &gray,const cv::Mat &depth, cons
     if (mSettings.DO_GAUSSIAN_SMOOTHING_BEFORE_CANNY)
     {
         cv::Mat smoothImg = gray.clone();
-	//selectiveBlur(gray,smoothImg,5,5);
         cv::GaussianBlur(gray,smoothImg,cv::Size(5,5),0);
 	//cv::medianBlur(gray,smoothImg,5);
         cv::Canny(smoothImg,edges,mSettings.cannyThreshold1,mSettings.cannyThreshold2,3,true); 
@@ -184,7 +142,6 @@ void ImgPyramidRGBD::addLevelEdge(const cv::Mat &gray,const cv::Mat &depth, cons
     else
         cv::Canny(gray,edges,mSettings.cannyThreshold1,mSettings.cannyThreshold2,3,true);
 
-    // cv::Canny(gray,edges,mSettings.cannyThreshold1,mSettings.cannyThreshold2,3,true);
     this->edgesOrigPyr.push_back(edges.clone());
     this->edgesPyr.push_back(edges);
     const float nPercentage = generateDistHistogram(edges,distPatchSizes[lvl]);
@@ -238,8 +195,7 @@ void ImgPyramidRGBD::makeKeyframe()
     for (int lvl = 0; lvl < mSettings.nLevels(); ++lvl)
     {
         const Camera cam = cameraPyr->at(lvl);
-        //cv::imshow("edgesPyr.at(lvl)",edgesPyr.at(lvl));
-        //cv::waitKey(0);
+        
         cv::Mat dt;
         cv::distanceTransform(255-edgesPyr.at(lvl),dt,cv::DIST_L2, cv::DIST_MASK_PRECISE);
         this->dtPyr.push_back(dt);
@@ -316,7 +272,7 @@ void ImgPyramidRGBD::generateColoredPcl(uint lvl, Eigen::MatrixXf& clrPcl, bool 
                     const float X = Z * (xx-cam.cx) / cam.fx;
                     const float Y = Z * (yy-cam.cy) / cam.fy;
                     Eigen::Vector4f p3D(X,Y,Z,1);
-                    //const Eigen::Vector4f p3D_w = globTrans*p3D;
+
                     v << p3D[0], p3D[1], p3D[2], 1, clr[2]/255.0f,clr[1]/255.0f,clr[0]/255.0f,1;
                     clrPcl.col(linIdx) = v;
                     linIdx++;
@@ -326,10 +282,8 @@ void ImgPyramidRGBD::generateColoredPcl(uint lvl, Eigen::MatrixXf& clrPcl, bool 
     }
     I3D_LOG(i3d::info) << clrPcl.cols() << " " << clrPcl.rows();
     clrPcl.conservativeResize(clrPcl.rows(),linIdx);
-    //clrPcl = clrPcl.leftCols(linIdx;
+
 }
-
-
 
 // my selective blur
 void ImgPyramidRGBD::selectiveBlur(const cv::Mat& gray, cv::Mat& smoothImg, int r, unsigned threshold)

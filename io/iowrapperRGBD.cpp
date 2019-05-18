@@ -1,22 +1,3 @@
-/**
-* This file is part of REVO.
-*
-* Copyright (C) 2014-2017 Schenk Fabian <schenk at icg dot tugraz dot at> (Graz University of Technology)
-* For more information see <https://github.com/fabianschenk/REVO/>
-*
-* REVO is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-*
-* REVO is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with REVO. If not, see <http://www.gnu.org/licenses/>.
-*/
 #include "iowrapperRGBD.h"
 #include <unistd.h>
 #include "../utils/timer.h"
@@ -31,10 +12,8 @@ IOWrapperRGBD::IOWrapperRGBD(const IOWrapperSettings& settings, const ImgPyramid
 #ifdef WITH_ORBBEC_ASTRA_PRO
     if (mSettings.READ_FROM_ASTRA_PRO)
     {
-        //OrbbecAstraEngine astra;
-        //bool t = astra.isInitSuccess();
         I3D_LOG(i3d::info) << "After astra normal!";
-        //orbbecSensor = std::unique_ptr<OrbbecAstraEngine>(&astra);
+
 #ifdef WITH_ORBBEC_FFMPEG
         orbbecAstraProSensor = std::unique_ptr<OrbbecAstraProEngineFFMPEG>(new OrbbecAstraProEngineFFMPEG());
 #else
@@ -94,7 +73,7 @@ void IOWrapperRGBD::generateImgPyramidFromAstraPro()
             rgb.row(2).copyTo(rgb.row(1));
             if (mSettings.DO_OUTPUT_IMAGES) writeImages(rgb,depth,nFrames);
             I3D_LOG(i3d::info) << mSettings.DEPTH_SCALE_FACTOR;
-            //mPyrQueue.push(pyr);
+
             std::unique_ptr<ImgPyramidRGBD> ptrTmp(std::unique_ptr<ImgPyramidRGBD>(new ImgPyramidRGBD(mPyrConfig,mCamPyr,rgb,depth,nFrames)));
             {
                 std::unique_lock<std::mutex> lock(this->mtx);
@@ -111,35 +90,8 @@ void IOWrapperRGBD::generateImgPyramidFromAstraPro()
     exit(0);
 #endif
 }
-//void IOWrapperRGBD::adaptCannyValues()
-//{
-//    if (flagAdaptedThresholds) return;
-//    //Now, detect and count the edges;
-//    cv::Mat gray,edges;
-//    cv::cvtColor(rgb,gray,CV_BGRA2GRAY);
-//    const float upFactor = 1.2f, downFactor = 0.8f;
-//    int minEdges = 20000;
-//    int maxEdges = 25000;
-//    cannyThreshold1 = 150;
-//    cannyThreshold2= 100;
-//    while (!flagAdaptedThresholds)
-//    {
-//        cv::Canny(gray,edges,static_cast<int>(cannyThreshold1),static_cast<int>(cannyThreshold2),3,true);
-//        const int nEdges = cv::countNonZero(edges);
-//        I3D_LOG(i3d::info) << "Adapted Canny values: " << cannyThreshold1 << " " << cannyThreshold2 << "nEdges: " << nEdges;
-//        //we want to have between 15k and 20k edges
-//        if (nEdges >= minEdges && nEdges <= maxEdges)
-//            flagAdaptedThresholds = true;
-//        else
-//        {
-//            //if smaller than 15000, lower the threshold else raise it!
-//            cannyThreshold1 = (nEdges < minEdges ? cannyThreshold1*downFactor : cannyThreshold1*upFactor);
-//            cannyThreshold2 = (nEdges < minEdges ? cannyThreshold2*downFactor : cannyThreshold2*upFactor);
-//        }
-//    }
-//    mPyrConfig.cannyThreshold1 = static_cast<int>(cannyThreshold1);
-//    mPyrConfig.cannyThreshold2 = static_cast<int>(cannyThreshold2);
-//}
+
+
 void IOWrapperRGBD::generateImgPyramidFromAstra()
 {
 #ifdef WITH_ORBBEC_ASTRA
@@ -155,11 +107,10 @@ void IOWrapperRGBD::generateImgPyramidFromAstra()
             rgb.row(2).copyTo(rgb.row(1));
             if (mSettings.SKIP_FIRST_N_FRAMES > nFrames) //skips the first n Frames
                 continue;
-            //if (mSettings.DO_ADAPT_CANNY_VALUES) //try to find the correct Canny values during the first 10 frames
-            //    adaptCannyValues();
+            
             if (mSettings.DO_OUTPUT_IMAGES) writeImages(rgb,depth,nFrames);
             I3D_LOG(i3d::info) << mSettings.DEPTH_SCALE_FACTOR;
-            //mPyrQueue.push(pyr);
+
             std::unique_ptr<ImgPyramidRGBD> ptrTmp(std::unique_ptr<ImgPyramidRGBD>(new ImgPyramidRGBD(mPyrConfig,mCamPyr,rgb,depth,nFrames)));
             {
                 std::unique_lock<std::mutex> lock(this->mtx);
@@ -188,14 +139,13 @@ void IOWrapperRGBD::writeImages(const cv::Mat& rgb, const cv::Mat depth, const f
         char buffer[80];
 
         strftime(buffer,80,"%d-%m-%Y-%I-%M-%S",tm);
-        //std::string str(buffer);
+
         outputImgDir = std::string(buffer);
         if (boost::filesystem::create_directory(outputImgDir))
         {
             associateFile.open(outputImgDir+"/associate.txt");
             boost::filesystem::create_directory(outputImgDir+"/rgb");
             boost::filesystem::create_directory(outputImgDir+"/depth");
-            //I3D_LOG(i3d::error) << "error generating directories";
         }
     }
     else
@@ -229,7 +179,7 @@ void IOWrapperRGBD::generateImgPyramidFromRealSense()
             //there is a strange orbbec bug, where the first two lines of the "color" image are invalid
             if (mSettings.DO_OUTPUT_IMAGES) writeImages(rgb,depth,nFrames);
             I3D_LOG(i3d::info) << mSettings.DEPTH_SCALE_FACTOR;
-            //mPyrQueue.push(pyr);
+
             std::unique_ptr<ImgPyramidRGBD> ptrTmp(std::unique_ptr<ImgPyramidRGBD>(new ImgPyramidRGBD(mPyrConfig,mCamPyr,rgb,depth,nFrames)));
             {
                 std::unique_lock<std::mutex> lock(this->mtx);
@@ -256,8 +206,7 @@ void IOWrapperRGBD::requestQuit()
 }
 void IOWrapperRGBD::generateImgPyramidFromFiles()
 {
-//    cv::Mat rgb = cv::Mat(480,640,CV_8UC3);
-//    cv::Mat depth = cv::Mat(480,640,CV_32FC1);
+
     double rgbTimeStamp = 0,depthTimeStamp = 0;
     while (readNextFrame(rgb,depth,rgbTimeStamp,depthTimeStamp,mSettings.SKIP_FIRST_N_FRAMES,mSettings.DEPTH_SCALE_FACTOR) && !mFinish)
     {
@@ -291,7 +240,7 @@ void IOWrapperRGBD::generateImgPyramidFromFiles()
         if (nFrames>mSettings.READ_N_IMAGES) break;
         usleep(1000);
     }
-    //this->mHasMoreImages = false;
+
     mAllImagesRead = true;
     while (!mFinish)
     {
@@ -305,11 +254,10 @@ bool IOWrapperRGBD::readNextFrame(cv::Mat& rgb, cv::Mat& depth, double &rgbTimeS
     bool fileRead = false;
     std::string currRGBFile, currDepthFile;
     std::string inputLine;
-    //std::cout << this->dataFolder << std::endl;
+
     //read lines
     while((std::getline(fileList,inputLine)))
     {
-        //ignore comments
         if (inputLine[0] == '#' || inputLine.empty()) continue;
         noFrames++;
         if (noFrames<=skipFrames) continue;
@@ -321,7 +269,7 @@ bool IOWrapperRGBD::readNextFrame(cv::Mat& rgb, cv::Mat& depth, double &rgbTimeS
         break;
     }
     //now read the images
-    //I3D_LOG(i3d::info) << "Reading: " << mSettings.MainFolder+"/"++mSettings.subDataset+currRGBFile;
+
     rgb = cv::imread(mSettings.MainFolder+"/"+mSettings.subDataset+"/"+currRGBFile);
     depth = cv::imread(mSettings.MainFolder+"/"+mSettings.subDataset+"/"+currDepthFile,cv::IMREAD_UNCHANGED);
     depth.convertTo(depth,CV_32FC1,1.0f/depthScaleFactor);

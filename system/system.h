@@ -1,22 +1,3 @@
-/**
-* This file is part of REVO.
-*
-* Copyright (C) 2014-2017 Schenk Fabian <schenk at icg dot tugraz dot at> (Graz University of Technology)
-* For more information see <https://github.com/fabianschenk/REVO/>
-*
-* REVO is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-*
-* REVO is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with REVO. If not, see <http://www.gnu.org/licenses/>.
-*/
 #pragma once
 #include <string>
 #include "optimizer.h"
@@ -183,9 +164,9 @@ private:
     std::vector<double> accStructureTimes;
     std::vector<double> dT;
     bool isFinished;
-    //std::vector<std::shared_ptr<ImgPyramidRGBD>> mKeyframes;
+
 private:
-    //Eigen::Matrix4f relativePoseToWorld(const Eigen::Matrix4f& pose_rc);
+
     inline Eigen::Matrix4f transformFromRT(const Eigen::Matrix3f& R, const Eigen::Vector3f& T) const
     {
         Eigen::Matrix4f transform = Eigen::Matrix4f::Identity();
@@ -195,7 +176,7 @@ private:
     }
     TrackerNew::TrackerStatus checkTrackingResult(const Eigen::Matrix4f &currPoseInWorld);
     void writePose(const Eigen::Matrix3f &R, const Eigen::Vector3f &T, const double timeStamp);
-    //WindowedOptimization windowedOptimization;
+
     static inline std::string RTToTUMString(const Eigen::Matrix3d& R, const Eigen::Vector3d& T, double timeStamp)
     {
         Eigen::Quaterniond Qf(R);
