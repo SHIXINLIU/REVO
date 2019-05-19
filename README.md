@@ -41,15 +41,17 @@ Download the sequence you want to test and generate an "associate.txt" file to a
 python associate.py DATASET_XXX/rgb.txt DATASET_XXX/depth.txt > associate.txt
 ```
 in the dataset directory. 
+
 After generating the "associate.txt" file, move it to your dataset directory. Then specify the path to dataset and associate.txt in the dataset_tumX.yaml settings file(in /config).
 To run the dataset: 
 In the "REVO" directory
 ```bash
 build/REVO config/revo_settings.yaml config/dataset_tum1.yaml
 ```
-There're many setting parameters in these two '.yaml' files. 
-In "/config/revo_settings.yaml", "DO_GENERATE_DENSE_PCL" is for image pyrimid to improve sparse area and "DO_GAUSSIAN_SMOOTHING_BEFORE_CANNY" is for Gaussian blur before canny edge detection. They have been all set to 1, and you can change their value to 0 to compare the result. 
-In "/config/data_tum1.yaml", you must modify your path to the mainfolder, subfolder of dataset and the associate.txt. Also, you should check the type of camera(like freiburg1, observed by the dataset name) and modify the camera parameters if necessary. The camera parameters can be searched on the above TUM website. 
+There're many setting parameters in these two '.yaml' files.
+ 
+* In "/config/revo_settings.yaml", "DO_GENERATE_DENSE_PCL" is for image pyrimid to improve sparse area and "DO_GAUSSIAN_SMOOTHING_BEFORE_CANNY" is for Gaussian blur before canny edge detection. They have been all set to 1, and you can change their value to 0 to compare the result. 
+* In "/config/data_tum1.yaml", you must modify your path to the mainfolder, subfolder of dataset and the associate.txt. Also, you should check the type of camera(like freiburg1, observed by the dataset name) and modify the camera parameters if necessary. The camera parameters can be searched on the above TUM website. 
 
 For evaluation of the absolute trajectory error (ATE) and relative pose error (RPE) download the corresponding scripts from [TUM RGBD Tools](https://svncvpr.in.tum.de/cvpr-ros-pkg/trunk/rgbd_benchmark/rgbd_benchmark_tools/src/rgbd_benchmark_tools/).
 
