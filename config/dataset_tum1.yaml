@@ -1,10 +1,11 @@
 %YAML:1.0
 
 #--------------dataset path-------------
+# mainfolder
 MainFolder: "dataset"
-
+# sub folder
 Datasets: "rgbd_dataset_freiburg1_desk"
-
+# associate.txt
 ASSOCIATE: "associate.txt"
 
 

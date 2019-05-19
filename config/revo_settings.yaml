@@ -1,12 +1,11 @@
 %YAML:1.0
 
-# TUM dataset input
+# we use TUM dataset, so set 0 for dataset input
 INPUT_TYPE: 0
 
 #GENERAL
 # textureless area improvement
 DO_GENERATE_DENSE_PCL: 1
-
 DO_GAUSSIAN_SMOOTHING_BEFORE_CANNY: 1
 DO_SHOW_DEBUG_IMAGE: 0
 DO_USE_PANGOLIN_VIEWER: 1
