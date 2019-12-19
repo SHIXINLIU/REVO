@@ -29,7 +29,9 @@ Set the optional packages in the cmake-gui
 ### Build commands
 ```bash
 git clone REVO
-cd REVO; mkdir build; cd build
+cd REVO
+mkdir build
+cd build
 cmake . ..
 make -j
 ```
